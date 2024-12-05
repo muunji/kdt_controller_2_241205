@@ -23,22 +23,25 @@ const server = http.createServer((req,res)=> {
     if(req.url === "/text") {
       req.on("data",(chunk)=>{
         //한글로 받아오기
-        const string = decodeURI(chunk.toString('utf-8'));
+        const string = decodeURI(chunk.toString());
         const key =string.split('=');
+        //배열확인
         console.log(key[0]);
-        // console.log(JSON.stringify(key));
-        body+=decodeURI(chunk.toString('utf-8'));
+        //객체로 넣기
+        // body+=decodeURI(chunk.toString('utf-8'));
+        body[key[0]] = key[1];
+        console.log(body);
       });
       req.on("end",()=>{
         console.log(body);
 
         if(body!==""){
-          fs.writeFile("text.txt",body,'utf-8',(err)=>{
+          fs.writeFile("text.json",JSON.stringify(body),'utf-8',(err)=>{
             if(err){
               console.error(err);
               return;
             }
-            console.log("make file");
+            console.log("make JSON file");
           })
         }
 
