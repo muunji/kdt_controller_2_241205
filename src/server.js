@@ -18,12 +18,12 @@ const server = http.createServer((req,res)=> {
   //POST 메소드
   if(req.method === "POST") {
     //data가 들어오는 곳
-    let body = "";
+    let body = {};
     //form data
     if(req.url === "/text") {
       req.on("data",(chunk)=>{
-        console.log(decodeURI(chunk.toString('utf-8')))
-        body+=chunk.toString('utf-8');
+        //한글로 받아오기
+        body+=decodeURI(chunk.toString('utf-8'));
       });
       req.on("end",()=>{
         console.log(body);
