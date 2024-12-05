@@ -27,13 +27,13 @@ const server = http.createServer((req,res)=> {
         const key =string.split('=');
         console.log(key[0]);
         // console.log(JSON.stringify(key));
-        body+=decodeURI(chunk.toString('utf-8'));
+        body[key[0]]=key[1];
       });
       req.on("end",()=>{
         console.log(body);
 
         if(body!==""){
-          fs.writeFile("text.txt",body,'utf-8',(err)=>{
+          fs.writeFile("text.json",JSON.stringify(body),'utf-8',(err)=>{
             if(err){
               console.error(err);
               return;
