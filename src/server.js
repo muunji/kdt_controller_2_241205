@@ -17,12 +17,15 @@ const server = http.createServer((req,res)=> {
   }
   //POST 메소드
   if(req.method === "POST") {
-    //data가 들어오는 곳
+    //data가 들어오는 곳, json -> 객체
     let body = {};
     //form data
     if(req.url === "/text") {
       req.on("data",(chunk)=>{
         //한글로 받아오기
+        const string = decodeURI(chunk.toString('utf-8'));
+        const key =string.split('=');
+        console.log(key)
         body+=decodeURI(chunk.toString('utf-8'));
       });
       req.on("end",()=>{
