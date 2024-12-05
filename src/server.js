@@ -18,16 +18,14 @@ const server = http.createServer((req,res)=> {
   //POST 메소드
   if(req.method === "POST") {
     //data가 들어오는 곳
-    let body = [];
+    let body = "";
     //form data
     if(req.url === "/text") {
       req.on("data",(chunk)=>{
-        //buffer 조각을 수집
-        body.push(chunk);
-        // body+=chunk.toString('utf-8');
+        console.log(decodeURI(chunk.toString('utf-8')))
+        body+=chunk.toString('utf-8');
       });
       req.on("end",()=>{
-        body = Buffer.concat(body).toString('utf-8');
         console.log(body);
 
         if(body!==""){
