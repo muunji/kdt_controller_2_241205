@@ -34,10 +34,10 @@ const server = http.createServer((req,res)=> {
         let existData = [];
 
         //파일이 존재한다면
-        if(fs.existsSync("/text.json")){
-          const fileContent = fs.readFileSync("/text.json","utf-8");
-          existData = JSON.parse(fileContent);
-          console.log(existData);
+        if(fs.existsSync("text.json")){
+          const fileContent = fs.readFileSync("text.json","utf-8");
+          existData += JSON.parse(fileContent);
+          return existData;
         }
 
         //기존 파일에 데이터 추가
