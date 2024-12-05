@@ -25,7 +25,8 @@ const server = http.createServer((req,res)=> {
         //한글로 받아오기
         const string = decodeURI(chunk.toString('utf-8'));
         const key =string.split('=');
-        console.log(key)
+        console.log(key[0]);
+        // console.log(JSON.stringify(key));
         body+=decodeURI(chunk.toString('utf-8'));
       });
       req.on("end",()=>{
