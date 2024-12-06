@@ -33,6 +33,7 @@ const server = http.createServer((req,res)=> {
         console.log(body);
 
         //파일 존재 여부 확인
+        console.log(fs.existsSync(path.join(__dirname,"/text.json")));
         //파일이 없다면 json파일 만들기
         //파일이 있다면 데이터 추가
         if(body!==""){
