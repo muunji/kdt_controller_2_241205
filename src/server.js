@@ -32,28 +32,16 @@ const server = http.createServer((req,res)=> {
       req.on("end",()=>{
         console.log(body);
 
-        //변수 i 설정
-        let i = 0;
-        //i=0일 때 파일 생성
-        //i ++
-        //i 0이 아닐 때 데이터 더하기
-        if(i===0){
+        //파일 존재 여부 확인
+        //파일이 없다면 json파일 만들기
+        //파일이 있다면 데이터 추가
+        if(body!==""){
           fs.writeFile("text.json",JSON.stringify(body),'utf-8',(err)=>{
             if(err){
               console.error(err);
               return;
             }
-            console.log("make file"+i);
-          })
-          i++
-        }
-        if(i!==0){
-          fs.appendFileSync(path.join(__dirname,"/text.json"),JSON.stringify(body),(err)=>{
-            if(err){
-              console.error(err);
-              return;
-            }
-            console.log("add data" + i)
+            console.log("make file");
           })
         }
 
