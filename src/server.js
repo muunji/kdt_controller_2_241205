@@ -44,6 +44,12 @@ const server = http.createServer((req,res)=> {
         if(fileCheck) {
           const fileContent = fs.readFileSync(filePath,'utf-8');
           jsonData = JSON.parse(fileContent);
+          console.log(jsonData);
+        }
+
+        //만약 jsonData가 객체라면 배열로 반환
+        if(typeof jsonData === 'object' && !Array.isArray(jsonData)) {
+          jsonData=Object.values(jsonData);
         }
 
         //parseData를 배열로 추가
