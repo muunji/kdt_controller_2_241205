@@ -40,7 +40,7 @@ const server = http.createServer((req,res)=> {
 
       //파일 처리
       const fileCheck = fs.existsSync(filePath);
-      cnsole.log("fileCheck : "+ fileCheck); //true, false
+      console.log("fileCheck : "+ fileCheck); //true, false
 
       let jsonData;
 
