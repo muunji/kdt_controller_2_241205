@@ -49,7 +49,12 @@ const server = http.createServer((req,res)=> {
         //파일이 있다면 데이터 추가
         if(fileCheck){
           //파일 읽기
+          const existData = fs.readFileSync(path.join(__dirname,"/text.json"));
+          const jsonData = JSON.parse(existData); //JSON 문자열 객체로 변환
+
           //데이터 추가
+          const update = {...jsonData, ...body};
+          
           //파일 쓰기
         }
 
