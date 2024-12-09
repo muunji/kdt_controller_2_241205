@@ -33,7 +33,7 @@ const server = http.createServer((req,res)=> {
 
         //데이터 파싱
         const parseData= querystring.parse(body);
-        console.log("parseData: "+pageData);
+        console.log("parseData: "+parseData);
 
         //파일 처리
         const fileCheck = fs.existsSync(filePath);
@@ -52,7 +52,7 @@ const server = http.createServer((req,res)=> {
         }
         
         //기본 데이터와 새로운 데이터 합치기
-        jsonData = {...jsonData,...parseArrData};
+        jsonData = {...jsonData,...parseData};
 
         fs.writeFileSync(filePath,JSON.stringify(jsonData,null,2),'utf-8');
         console.log("save file");
