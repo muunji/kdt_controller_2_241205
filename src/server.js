@@ -34,16 +34,10 @@ const server = http.createServer((req,res)=> {
 
         //파일 존재 여부 확인
         const fileCheck = fs.existsSync(path.join(__dirname,"/text.json"))
-        console.log(fileCheck);
+        console.log(fileCheck); //true, false
         //파일이 없다면 json파일 만들기
         if(!fileCheck){
-
-        }
-        //파일이 있다면 데이터 추가
-        if(fileCheck){
-          
-        }
-        if(body!==""){
+          //false -> 파일 만들어짐
           fs.writeFile("text.json",JSON.stringify(body),'utf-8',(err)=>{
             if(err){
               console.error(err);
@@ -51,6 +45,12 @@ const server = http.createServer((req,res)=> {
             }
             console.log("make file");
           })
+        }
+        //파일이 있다면 데이터 추가
+        if(fileCheck){
+          //파일 읽기
+          //데이터 추가
+          //파일 쓰기
         }
 
       const pageData = fs.readFileSync(path.join(__dirname,"/public/index.html"),'utf-8',()=>{});
