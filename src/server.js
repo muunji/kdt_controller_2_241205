@@ -54,8 +54,15 @@ const server = http.createServer((req,res)=> {
 
           //데이터 추가
           const update = {...jsonData, ...body};
-          
+
           //파일 쓰기
+          fs.writeFile(path.join(__dirname,"/text.json"),JSON.stringify(update),'utf-8',(err)=>{
+            if(err){
+              console.error(err);
+              return;
+            }
+            console.log("updated file");
+          });
         }
 
       const pageData = fs.readFileSync(path.join(__dirname,"/public/index.html"),'utf-8',()=>{});
