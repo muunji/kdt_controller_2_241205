@@ -59,8 +59,8 @@ const server = http.createServer((req,res)=> {
         console.log("save file");
 
         //응답
-        res.writeHead(200,{"content-type":"application/json"});
-        res.end(JSON.stringify({message: "save success"}));
+        res.writeHead(302,{"Location":"/"});
+        res.end();
       })
     }
   }
