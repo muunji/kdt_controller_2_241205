@@ -33,7 +33,7 @@ const server = http.createServer((req,res)=> {
 
         //데이터 파싱
         const parseData= querystring.parse(body);
-        console.log("parseData: "+parseData);
+        console.log("parseData: ",parseData);
 
         //파일 처리
         const fileCheck = fs.existsSync(filePath);
