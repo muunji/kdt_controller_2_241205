@@ -50,10 +50,12 @@ const server = http.createServer((req,res)=> {
         if(fileCheck){
           //파일 읽기
           const existData = fs.readFileSync(path.join(__dirname,"/text.json"));
-          const jsonData = JSON.parse(existData); //JSON 문자열 객체로 변환
+          // const jsonData = JSON.parse(existData); //JSON 문자열 객체로 변환
+          console.log("existdata : "+existData);
+          // console.log("jsondata : "+jsonData);
 
           //데이터 추가
-          const update = {...jsonData, ...body};
+          const update = {...existData, ...body};
 
           //파일 쓰기
           fs.writeFile(path.join(__dirname,"/text.json"),JSON.stringify(update),'utf-8',(err)=>{
