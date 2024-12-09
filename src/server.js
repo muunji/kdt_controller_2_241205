@@ -46,7 +46,7 @@ const server = http.createServer((req,res)=> {
             console.log("make file");
           })
         }
-        //파일이 있다면 데이터 추가
+        //파일이 있다면 데이터 추가 -> 안됨
         if(fileCheck){
           //파일 읽기
           const existData = fs.readFileSync(path.join(__dirname,"/text.json"));
