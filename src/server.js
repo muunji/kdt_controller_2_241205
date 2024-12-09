@@ -1,9 +1,11 @@
 import http from "node:http";
 import fs, { writeFileSync } from "node:fs";
 import path from "node:path";
+import querystring from "node:querystring";
 
 const PORT = 3000;
 const __dirname = path.resolve();
+const filePath = path.join(__dirname,"/text.json");
 
 const server = http.createServer((req,res)=> {
   // GET 메소드
@@ -33,42 +35,26 @@ const server = http.createServer((req,res)=> {
           acc[key]=value;
           return acc;
         },{});
-        console.log("parseData : "+pageData);
+        console.log("parseData : "+parseData);
+
+        //파일 처리
+        const fileCheck = fs.existsSync(filePath);
+        console.log("fileCheck : "+ fileCheck); //true, false
+
+        let jsonData;
+
+        //파일이 존재하면 내용을 읽고 JSON 객체로 변환
+        if(fileCheck) {
+          const fileContent = fs.readFileSync(filePath,'utf-8');
+          jsonData = JSON.parse(fileContent);
+        }
+        //파일이 없다면 빈 객체로 초기화
+        else {
+          jsonData = {};
+        }
         
-        //파일 존재 여부 확인
-        const fileCheck = fs.existsSync(path.join(__dirname,"/text.json"))
-        console.log(fileCheck); //true, false
-        //파일이 없다면 json파일 만들기
-        if(!fileCheck){
-          //false -> 파일 만들어짐
-          fs.writeFile("text.json",JSON.stringify(body),'utf-8',(err)=>{
-            if(err){
-              console.error(err);
-              return;
-            }
-            console.log("make file");
-          })
-        }
-        //파일이 있다면 데이터 추가 -> 안됨
-        if(fileCheck){
-          //파일 읽기
-          const existData = fs.readFileSync(path.join(__dirname,"/text.json"));
-          // const jsonData = JSON.parse(existData); //JSON 문자열 객체로 변환
-          console.log("existdata : "+existData);
-          // console.log("jsondata : "+jsonData);
-
-          //데이터 추가
-          const update = {...existData, ...body};
-
-          //파일 쓰기
-          fs.writeFile(path.join(__dirname,"/text.json"),JSON.stringify(update),'utf-8',(err)=>{
-            if(err){
-              console.error(err);
-              return;
-            }
-            console.log("updated file");
-          });
-        }
+        //기본 데이터와 새로운 데이터 합치기
+        jsonData = {...jsonData,...parseData};
 
       const pageData = fs.readFileSync(path.join(__dirname,"/public/index.html"),'utf-8',()=>{});
       res.writeHead(200,{"content-type":"text/html"});
