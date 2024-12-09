@@ -18,20 +18,23 @@ const server = http.createServer((req,res)=> {
   //POST 메소드
   if(req.method === "POST") {
     //data가 들어오는 곳, json -> 객체
-    let body = {};
+    let body = "";
     //form data
     if(req.url === "/text") {
       req.on("data",(chunk)=>{
-        //한글로 받아오기
-        const string = decodeURI(chunk.toString('utf-8'));
-        const key =string.split('=');
-        console.log(key[0]);
-        // console.log(JSON.stringify(key));
-        body[key[0]]=key[1];
+       //데이터 누적
+       body += chunk.toString();
       });
       req.on("end",()=>{
-        console.log(body);
-
+        console.log("body:"+body);
+        //데이터 파싱
+        const parseData = body.split('&').reduce((acc,pair)=>{
+          const [key, value] = pair.split('=').map(decodeURIComponent);
+          acc[key]=value;
+          return acc;
+        },{});
+        console.log("parseData : "+pageData);
+        
         //파일 존재 여부 확인
         const fileCheck = fs.existsSync(path.join(__dirname,"/text.json"))
         console.log(fileCheck); //true, false
