@@ -7,6 +7,7 @@ const PORT = 3000;
 const __dirname = path.resolve();
 const filePath = path.join(__dirname,"/text.json");
 
+
 const server = http.createServer((req,res)=> {
   // GET 메소드
   if(req.method==="GET") {
