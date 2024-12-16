@@ -70,7 +70,16 @@ const server = http.createServer((req,res)=> {
   }
   //DELETE
   if(req.method==="DELETE"){
-    
+    if(req.url==='/fileReset'){
+      //파일이 존재하면 삭제
+      const fileCheck = fs.existsSync(filePath);
+      if(fileCheck){
+        fs.unlinkSync(filePath);
+        console.log("delete file");
+      }
+      res.writeHead(200,{"content-type":"text/plain"});
+      res.end("delete file")
+    }
   }
 })
 .listen(PORT,()=>{
