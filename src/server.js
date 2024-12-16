@@ -19,7 +19,7 @@ const server = http.createServer((req,res)=> {
       res.end();
     }
     if(req.url ==='/scripts.js') {
-      const scriptData = fs.readFileSync(path.join(__dirname,"../public/script.js"),'utf-8',()=>{});
+      const scriptData = fs.readFileSync(path.join(__dirname,"/public/script.js"),'utf-8',()=>{});
       res.writeHead(200,{"content-type":"application/javascript"});
       res.write(scriptData);
       res.end();
@@ -73,8 +73,7 @@ const server = http.createServer((req,res)=> {
     }
   }
   //DELETE
-  if(req.method==="DELETE"){
-    if(req.url==='/fileReset'){
+  if(req.method==="DELETE" && req.url ==='/fileReset'){
       //파일이 존재하면 삭제
       const fileCheck = fs.existsSync(filePath);
       if(fileCheck){
@@ -83,7 +82,6 @@ const server = http.createServer((req,res)=> {
       }
       res.writeHead(200,{"content-type":"text/plain"});
       res.end("delete file")
-    }
   }
 })
 .listen(PORT,()=>{
