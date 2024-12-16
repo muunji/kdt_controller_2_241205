@@ -68,6 +68,10 @@ const server = http.createServer((req,res)=> {
       })
     }
   }
+  //DELETE
+  if(req.method==="DELETE"){
+    
+  }
 })
 .listen(PORT,()=>{
   console.log("http://localhost:3000");
