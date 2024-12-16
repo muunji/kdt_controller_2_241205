@@ -11,6 +11,9 @@ const server = http.createServer((req,res)=> {
   // GET 메소드
   if(req.method==="GET") {
     if(req.url === "/"){
+      //파일을 비우고 빈 배열을 다시 작성하여 초기화 > 빈 배열로 덮어쓰기기
+      // fs.writeFileSync(filePath, JSON.stringify([],null,2),'utf-8');
+
       const pageData = fs.readFileSync(path.join(__dirname,"/public/index.html"),'utf-8',()=>{});
       res.writeHead(200,{"content-type":"text/html"});
       res.write(pageData);
