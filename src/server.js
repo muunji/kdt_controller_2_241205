@@ -12,7 +12,7 @@ const filePath = path.join(__dirname,"/text.json");
 function initial(){
   const initialData = [];
   writeFileSync(filePath,JSON.stringify(initialData,null,2),'utf-8');
-  console.log("서버 시작 - JSON 파일 초기화")
+  console.log("JSON 파일 초기화")
 }
 
 initial();
@@ -81,9 +81,7 @@ const server = http.createServer((req,res)=> {
     }
     if(req.url === "/reset"){
       //JSON 파일 초기화
-      const initialData= [];
-      writeFileSync(filePath,JSON.stringify(initialData,null,2),'utf-8');
-      console.log("새로고침 요청 > 초기화");
+      initial();
 
       res.writeHead(200,{"content-type":"application/json"});
       res.end(JSON.stringify({success:true}));
