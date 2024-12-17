@@ -20,6 +20,7 @@ function initial(){
   console.log("JSON 파일 초기화")
 }
 
+
 //readfile > func
 function pageData(res,url,type){
   const data = fs.readFileSync(path.join(__dirname,url),'utf-8',()=>{});
@@ -29,6 +30,24 @@ function pageData(res,url,type){
 }
 
 initial();
+
+//sqlite 데이터베이스 연결
+async function connect () {
+  const db = await open({
+    filename: './data.db',
+    driver: sqlite3.Database
+  });
+
+  //테이블 없으면 생성
+  await db.run(`
+    CREATE TABLE IF NOT EXISTS data(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      about TEXT
+    )
+  `);
+
+  return db;
+}
 
 const server = http.createServer((req,res)=> {
   // GET 메소드
