@@ -104,21 +104,22 @@ const server = http.createServer((req,res)=> {
 const wss = new WebSocketServer({server});
 
 //웹소켓 연결 수락
-wss.on("connection",(ws)=>{
+wss.on("connection",async (ws)=>{
   console.log("웹소켓 : 연결");
 
-  //클라이언트가 연결되면, 현재 데이터 전송
-  fs.readFile(filePath,'utf-8',(err,data)=>{
-    if(err) throw err;
-    //클라이언트에 데이터 전송
-    ws.send(data);
-  });
+  //데이터베이스에서 데이터 읽기
+  const db = await connect();
+  const rows = await db.all("SELECT * FROM data");
 
-  //클라이언트가 메시지를 보낼 때
-  ws.on("message",(message)=>{
-    console.log("받은 메시지:",message);
+  //클라이언트에 데이터 전송송
+    ws.send(JSON.stringify(data));
+
+    //클라이언트가 메시지를 보낼 때
+    ws.on("message",(message)=>{
+      console.log("받은 메시지:",message);
+    });
   });
-});
+  
 server.listen(PORT,()=>{
   console.log(`http://localhost:${PORT}`);
 
