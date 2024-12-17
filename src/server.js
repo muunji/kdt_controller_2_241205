@@ -11,12 +11,22 @@ const filePath = path.join(__dirname,"/text.json");
 //초기 데이터
 const initialData = [];
 writeFileSync(filePath,JSON.stringify(initialData,null,2),'utf-8');
-console.log("JSON 파일 초기화")
+console.log("서버 시작 - JSON 파일 초기화")
 
 const server = http.createServer((req,res)=> {
   // GET 메소드
   if(req.method==="GET") {
     if(req.url === "/"){
+
+      //초기화 여부를 결정하는 조건
+      const shouldReset = false;
+      if(shouldReset){
+        const initialData = [];
+        writeFileSync(filePath,JSON.stringify(initialData,null,2),'utf-8');
+        console.log("새로고침 - JSON 파일 초기화")
+      }
+
+
       const pageData = fs.readFileSync(path.join(__dirname,"/public/index.html"),'utf-8',()=>{});
       res.writeHead(200,{"content-type":"text/html"});
       res.write(pageData);
