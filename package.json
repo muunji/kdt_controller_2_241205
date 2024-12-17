@@ -5,8 +5,5 @@
   "repository": "https://github.com/muunji/kdt_controller_2_241205.git",
   "author": "muunji <twoji3019@naver.com>",
   "license": "MIT",
-  "type": "module",
-  "scripts": {
-    "start":"node src/server.js"
-  }
+  "type": "module"
 }

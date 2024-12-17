@@ -7,6 +7,12 @@ const PORT = 3000;
 const __dirname = path.resolve();
 const filePath = path.join(__dirname,"/text.json");
 
+//JSON 파일 초기화
+//초기 데이터
+const initialData = [];
+writeFileSync(filePath,JSON.stringify(initialData,null,2),'utf-8');
+console.log("JSON 파일 초기화")
+
 const server = http.createServer((req,res)=> {
   // GET 메소드
   if(req.method==="GET") {
