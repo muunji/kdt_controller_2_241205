@@ -49,7 +49,7 @@ async function connect () {
   return db;
 }
 
-const server = http.createServer((req,res)=> {
+const server = http.createServer(async(req,res)=> {
   // GET 메소드
   if(req.method==="GET") {
     if(req.url === "/"){
@@ -92,9 +92,11 @@ const server = http.createServer((req,res)=> {
       })
     }
     if(req.url === "/reset"){
-      //JSON 파일 초기화
-      initial();
-
+      
+      //데이터 베이스 초기화
+      const db = await connect();
+      await db.run("DELETE FROM data");
+      
       res.writeHead(200,{"content-type":"application/json"});
       res.end(JSON.stringify({success:true}));
     }
@@ -119,7 +121,7 @@ wss.on("connection",async (ws)=>{
       console.log("받은 메시지:",message);
     });
   });
-  
+
 server.listen(PORT,()=>{
   console.log(`http://localhost:${PORT}`);
 
