@@ -2,6 +2,7 @@ import http from "node:http";
 import fs, { writeFileSync } from "node:fs";
 import path from "node:path";
 import querystring from "node:querystring";
+import { WebSocket } from "node:http";
 
 const PORT = 3000;
 const __dirname = path.resolve();
@@ -76,6 +77,14 @@ const server = http.createServer((req,res)=> {
         fs.writeFileSync(filePath,JSON.stringify(jsonData,null,2),'utf-8');
         console.log("save file");
 
+        //모든 클라이언트에게 데이터 변경 사항 전송
+        ws.clients.forEach((client)=>{
+          if(client.readyState === WebSocket.OPEN){
+            client.send(JSON.stringify(jsonData));
+          }
+        });
+
+
         //응답
         res.writeHead(302,{"Location":"/"});
         res.end();
@@ -89,7 +98,30 @@ const server = http.createServer((req,res)=> {
       res.end(JSON.stringify({success:true}));
     }
   }
-})
-.listen(PORT,()=>{
-  console.log("http://localhost:3000");
-})
+});
+
+//웹소켓 서버 생성
+const ws = new WebSocket.Server({server});
+
+ws.on("connection",(ws)=>{
+  console.log("웹소켓 : 연결");
+
+  //클라이언트가 연결되면, 현재 데이터 전송
+  fs.readFile(filePath,'utf-8',(err,data)=>{
+    if(err) throw err;
+    //클라이언트에 데이터 전송
+    ws.send(data);
+  });
+
+  //클라이언트가 메시지를 보낼 때
+  ws.on("message",(message)=>{
+    console.log("받은 메시지:",message);
+  });
+});
+
+
+
+server.listen(PORT,()=>{
+  console.log(`http://localhost:${PORT}`);
+});
+
