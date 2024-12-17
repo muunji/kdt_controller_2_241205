@@ -45,7 +45,7 @@ function asyncOpen (db,query,params=[]){
     });
   });
 }
-//데이터베이스 연결결
+//데이터베이스 연결
 async function connect () {
   const db = new sqlite3.Database('./data.db',(err)=>{
     if(err){
@@ -95,7 +95,7 @@ const server = http.createServer(async(req,res)=> {
         console.log("parseData: ",parseData);
 
         //데이터베이스 연결
-        const db = connect();
+        const db = await connect();
 
         //데이터베이스에 삽입
         const {about} = parseData;
@@ -111,8 +111,8 @@ const server = http.createServer(async(req,res)=> {
     if(req.url === "/reset"){
       
       //데이터 베이스 초기화
-      const db = connect();
-      db.run("DELETE FROM data");
+      const db = await connect();
+      await db.run("DELETE FROM data");
 
       res.writeHead(200,{"content-type":"application/json"});
       res.end(JSON.stringify({success:true}));
@@ -123,39 +123,25 @@ const server = http.createServer(async(req,res)=> {
 const wss = new WebSocketServer({server});
 
 //웹소켓 연결 수락
-wss.on("connection",(ws)=>{
+wss.on("connection",async (ws)=>{
   console.log("웹소켓 : 연결");
 
   //데이터베이스에서 데이터 읽기
-  const db =  connect();
-  db.all("SELECT * FROM data",(err,rows)=>{
-    if(err){
-      console.error('오류',err)
-    }else {
-      //클라이언트에 데이터 전송
-      ws.send(JSON.stringify(rows));
-    }
-  });
+  const db =   await connect();
+  const rows = await new Promise((resolve, reject)=>{
+    db.all("SELECT * FROM data",(err,rows)=>{
+      if(err) reject(err);
+      resolve(rows);
+    });
+  }) 
+  
+  console.log("전송할 데이터", rows);
+  //클라이언트에 데이터 전송
+  ws.send(JSON.stringify(rows));
 
     //클라이언트가 메시지를 보낼 때
     ws.on("message",(message)=>{
       console.log("받은 메시지:",message);
-    });
-
-    //데이터 베이스에 새 데이터 삽입 후 모든 클라이언트에 실시간으로 업데이트 전송
-    db.on("insert",()=>{
-      db.all("SELECT * FROM data",(err,rows)=>{
-        if(err){
-          console.error("데이터 조회 오류",err);
-        }else {
-          //모든 연결된 클라이언트에게 데이터 전송
-          wss.clients.forEach((client)=>{
-            if(client.readyState === WebSocket.open){
-              client.send(JSON.stringify(rows));
-            }
-          });
-        }
-      });
     });
   });
 
