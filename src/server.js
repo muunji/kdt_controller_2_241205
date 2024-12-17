@@ -22,7 +22,7 @@ const server = http.createServer((req,res)=> {
       res.write(pageData);
       res.end();
     }
-    if(req.url.includes(script)){
+    if(req.url.includes("script")){
       const scriptData = fs.readFileSync(path.join(__dirname,"/public/script.js"),'utf-8',()=>{});
       res.writeHead(200,{"content-type":"application/javascript"});
       res.write(scriptData);
