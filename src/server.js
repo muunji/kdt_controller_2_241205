@@ -96,7 +96,7 @@ const server = http.createServer(async(req,res)=> {
       //데이터 베이스 초기화
       const db = await connect();
       await db.run("DELETE FROM data");
-      
+
       res.writeHead(200,{"content-type":"application/json"});
       res.end(JSON.stringify({success:true}));
     }
@@ -114,7 +114,7 @@ wss.on("connection",async (ws)=>{
   const rows = await db.all("SELECT * FROM data");
 
   //클라이언트에 데이터 전송송
-    ws.send(JSON.stringify(data));
+    ws.send(JSON.stringify(rows));
 
     //클라이언트가 메시지를 보낼 때
     ws.on("message",(message)=>{
