@@ -2,7 +2,11 @@ import http from "node:http";
 import fs, { writeFileSync } from "node:fs";
 import path from "node:path";
 import querystring from "node:querystring";
+//websocket
 import WebSocket,{WebSocketServer}  from "ws";
+//sqlite
+import sqlite3 from 'sqlite3'
+import {open} from 'node:sqlite';
 
 const PORT = 3000;
 const __dirname = path.resolve();
