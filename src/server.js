@@ -32,10 +32,7 @@ const server = http.createServer((req,res)=> {
       pageData(res,"/public/index.html","text/html");
     }
     if(req.url.includes("script")){
-      const scriptData = fs.readFileSync(path.join(__dirname,"/public/script.js"),'utf-8',()=>{});
-      res.writeHead(200,{"content-type":"application/javascript"});
-      res.write(scriptData);
-      res.end();
+      pageData(res,"/public/script.js","application/javascript");
     }
   }
   //POST 메소드
