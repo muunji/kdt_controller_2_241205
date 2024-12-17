@@ -71,34 +71,20 @@ const server = http.createServer((req,res)=> {
         console.log("body:"+body);
       });
 
-      req.on("end",()=>{
+      req.on("end",async()=>{
 
         //데이터 파싱
         const parseData= querystring.parse(body);
         console.log("parseData: ",parseData);
 
-        //파일 처리
-        const fileCheck = fs.existsSync(filePath);
-        console.log("fileCheck : "+ fileCheck); //true, false
+        //데이터베이스 연결
+        const db = await connect();
 
-        //파일이 존재하면 내용을 읽고 JSON 객체로 변환
-        let jsonData=[];
-        if(fileCheck) {
-          const fileContent = fs.readFileSync(filePath,'utf-8');
-          jsonData = JSON.parse(fileContent);
-          console.log(jsonData);
-        }
+        //데이터베이스에 삽입
+        const {about} = parseData;
+        await db.run("INSERT INTO data (about) VALUES (?)",[about]);
 
-        //만약 jsonData가 객체라면 배열로 반환
-        if(typeof jsonData === 'object' && !Array.isArray(jsonData)) {
-          jsonData=Object.values(jsonData);
-        }
-
-        //parseData를 배열로 추가
-        jsonData.push(parseData);
-
-        fs.writeFileSync(filePath,JSON.stringify(jsonData,null,2),'utf-8');
-        console.log("save file");
+        console.log('데이터베이스에 저장');
 
         //응답
         res.writeHead(302,{"Location":"/"});
