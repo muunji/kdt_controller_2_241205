@@ -17,19 +17,15 @@ const server = http.createServer((req,res)=> {
   // GET 메소드
   if(req.method==="GET") {
     if(req.url === "/"){
-
-      //초기화 여부를 결정하는 조건
-      const shouldReset = false;
-      if(shouldReset){
-        const initialData = [];
-        writeFileSync(filePath,JSON.stringify(initialData,null,2),'utf-8');
-        console.log("새로고침 - JSON 파일 초기화")
-      }
-
-
       const pageData = fs.readFileSync(path.join(__dirname,"/public/index.html"),'utf-8',()=>{});
       res.writeHead(200,{"content-type":"text/html"});
       res.write(pageData);
+      res.end();
+    }
+    if(req.url.includes(script)){
+      const scriptData = fs.readFileSync(path.join(__dirname,"/public/script.js"),'utf-8',()=>{});
+      res.writeHead(200,{"content-type":"application/javascript"});
+      res.write(scriptData);
       res.end();
     }
   }
@@ -78,6 +74,15 @@ const server = http.createServer((req,res)=> {
         res.writeHead(302,{"Location":"/"});
         res.end();
       })
+    }
+    if(req.url === "/reset"){
+      //JSON 파일 초기화
+      const initialData= [];
+      writeFileSync(filePath,JSON.stringify(initialData,null,2),'utf-8');
+      console.log("새로고침 요청 > 초기화");
+
+      res.writeHead(200,{"content-type":"application/json"});
+      res.end(JSON.stringify({success:true}));
     }
   }
 })
