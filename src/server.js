@@ -15,16 +15,21 @@ function initial(){
   console.log("JSON 파일 초기화")
 }
 
+//readfile > func
+function pageData(res,url,type){
+  const data = fs.readFileSync(path.join(__dirname,url),'utf-8',()=>{});
+  res.writeHead(200,{"content-type":type});
+  res.write(data);
+  res.end();
+}
+
 initial();
 
 const server = http.createServer((req,res)=> {
   // GET 메소드
   if(req.method==="GET") {
     if(req.url === "/"){
-      const pageData = fs.readFileSync(path.join(__dirname,"/public/index.html"),'utf-8',()=>{});
-      res.writeHead(200,{"content-type":"text/html"});
-      res.write(pageData);
-      res.end();
+      pageData(res,"/public/index.html","text/html");
     }
     if(req.url.includes("script")){
       const scriptData = fs.readFileSync(path.join(__dirname,"/public/script.js"),'utf-8',()=>{});
