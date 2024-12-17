@@ -6,7 +6,7 @@ import querystring from "node:querystring";
 import WebSocket,{WebSocketServer}  from "ws";
 //sqlite
 import sqlite3 from 'sqlite3'
-import {open} from 'node:sqlite';
+import { rejects } from "node:assert";
 
 const PORT = 3000;
 const __dirname = path.resolve();
@@ -32,14 +32,31 @@ function pageData(res,url,type){
 initial();
 
 //sqlite 데이터베이스 연결
+//promise 래핑을 위한 헬퍼
+function asyncOpen (db,query,params=[]){
+  return new Promise((resolve,reject)=>{
+    db.run(query,params,function(err){
+      if(err){
+        reject(err);
+      } else {
+        // this는 쿼리 결과로 삽입된 행 ID등을 포함함
+        resolve(this);
+      }
+    });
+  });
+}
+//데이터베이스 연결결
 async function connect () {
-  const db = await open({
-    filename: './data.db',
-    driver: sqlite3.Database
+  const db = new sqlite3.Database('./data.db',(err)=>{
+    if(err){
+      console.error("연결 실패",err);
+    }else {
+      console.log("연결 성공");
+    }
   });
 
   //테이블 없으면 생성
-  await db.run(`
+  await asyncOpen(db,`
     CREATE TABLE IF NOT EXISTS data(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       about TEXT
