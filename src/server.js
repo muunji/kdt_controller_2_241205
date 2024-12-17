@@ -9,9 +9,13 @@ const filePath = path.join(__dirname,"/text.json");
 
 //JSON 파일 초기화
 //초기 데이터
-const initialData = [];
-writeFileSync(filePath,JSON.stringify(initialData,null,2),'utf-8');
-console.log("서버 시작 - JSON 파일 초기화")
+function initial(){
+  const initialData = [];
+  writeFileSync(filePath,JSON.stringify(initialData,null,2),'utf-8');
+  console.log("서버 시작 - JSON 파일 초기화")
+}
+
+initial();
 
 const server = http.createServer((req,res)=> {
   // GET 메소드
