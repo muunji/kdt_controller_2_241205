@@ -3,10 +3,9 @@ import fs, { writeFileSync } from "node:fs";
 import path from "node:path";
 import querystring from "node:querystring";
 //websocket
-import WebSocket,{WebSocketServer}  from "ws";
+import {WebSocketServer}  from "ws";
 //sqlite
-import sqlite3 from 'sqlite3'
-import { rejects } from "node:assert";
+import sqlite3 from 'sqlite3';
 
 const PORT = 3000;
 const __dirname = path.resolve();
