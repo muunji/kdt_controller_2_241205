@@ -10,10 +10,11 @@ import sqlite3 from 'sqlite3';
 const PORT = 3000;
 const __dirname = path.resolve();
 const filePath = path.join(__dirname,"/text.json");
+const dbPath = path.join(__dirname,"data.db");
 
 //db 파일 초기화
 async function initial(){
-  const db = new sqlite3.Database('/data.db',(err)=>{
+  const db = new sqlite3.Database(dbPath,(err)=>{
     if(err){
       console.error("연결 실패",err);
     }else {
@@ -60,15 +61,16 @@ function pageData(res,url,type){
 (async()=>{
   try{
     //데이터베이스 초기화
+    console.log("db 초기화 시작")
     await initial();
-    console.log("초기화 완료");
+    console.log("db 초기화 완료");
 
     //서버시작
     server.listen(PORT,()=>{
-      console.log("서버 실행 중")
+      console.log(`서버 실행 중 : http://localhost:${PORT}`)
     });
   }catch(err){
-    console.error("초기화중 오류");
+    console.error("초기화 중 오류",err);
   }
 })();
 
@@ -90,20 +92,23 @@ function asyncOpen (db,query,params=[]){
 async function connect () {
   const db = new sqlite3.Database('./data.db',(err)=>{
     if(err){
-      console.error("연결 실패",err);
+      console.error("db 연결 실패",err);
     }else {
-      console.log("연결 성공");
+      console.log("db 연결 성공");
     }
   });
 
   //테이블 없으면 생성
-  await asyncOpen(db,`
-    CREATE TABLE IF NOT EXISTS data(
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      about TEXT
-    )
-  `);
-
+  try{
+    await asyncOpen(db,`
+      CREATE TABLE IF NOT EXISTS data(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        about TEXT
+      )
+    `);
+  } catch (err){
+    console.error("table 생성 중 오류",err);
+  }
   return db;
 }
 
@@ -169,16 +174,24 @@ wss.on("connection",async (ws)=>{
 
   //데이터베이스에서 데이터 읽기
   const db =   await connect();
-  const rows = await new Promise((resolve, reject)=>{
-    db.all("SELECT * FROM data",(err,rows)=>{
-      if(err) reject(err);
-      resolve(rows);
+
+  try{
+    //데이터 조회
+    const rows = await new Promise((resolve, reject)=>{
+      db.all("SELECT * FROM data",(err,rows)=>{
+        if(err) reject(err);
+        resolve(rows);
+      });
     });
-  }) 
+    console.log("전송할 데이터", rows);
+    //클라이언트에 데이터 전송
+    ws.send(JSON.stringify(rows)); 
+  } catch (err) {
+    console.log("data 조회 오류",err);
+  }finally {
+    db.close();
+  }
   
-  console.log("전송할 데이터", rows);
-  //클라이언트에 데이터 전송
-  ws.send(JSON.stringify(rows));
 
     //클라이언트가 메시지를 보낼 때
     ws.on("message",(message)=>{
@@ -186,7 +199,7 @@ wss.on("connection",async (ws)=>{
     });
   });
 
-server.listen(PORT,()=>{
-  console.log(`http://localhost:${PORT}`);
-
-});
+//상단에서 초기화 함수와 함께 호출
+// server.listen(PORT,()=>{
+//   console.log(`http://localhost:${PORT}`);
+// });
