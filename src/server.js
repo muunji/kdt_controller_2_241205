@@ -1,5 +1,5 @@
 import http from "node:http";
-import fs, { writeFileSync } from "node:fs";
+import fs from "node:fs";
 import path from "node:path";
 import querystring from "node:querystring";
 //websocket
@@ -21,30 +21,29 @@ async function initial(){
       console.error("연결 성공")
     }
   });
-  
-  //테이블 초기화
+
+  //기존 테이블 삭제
+  await new Promise((resolve,reject)=>{
+    db.run("DROP TABLE IF EXISTS data",(err)=>{
+      if(err) reject(err);
+      else resolve();
+    });
+  });
+  //테이블 새로 생성
   await new Promise((resolve,reject)=>{
     db.run(
       `CREATE TABLE IF NOT EXISTS data(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       about TEXT
-      )`,(err)=>{
+      )`, 
+      (err)=>{
         if(err) reject(err);
         else resolve();
       }
     );
   });
-
-  //기존 데이터 삭제
-  await new Promise((resolve,reject)=>{
-    db.run("DELETE FROM data",(err)=>{
-      if(err) reject(err);
-      else {
-        console.log("초기화 완료");
-        resolve();
-      }
-    });
-  });
+  
+  console.log("초기화 완료");
 
   db.close();
 }
@@ -53,7 +52,7 @@ async function initial(){
 //readfile > func
 function pageData(res,url,type){
   const data = fs.readFileSync(path.join(__dirname,url),'utf-8',()=>{});
-  res.writeHead(200,{"content-type":type});
+  res.writeHead(200,{"content-type":type,"Cache-Control":"no-store"});
   res.write(data);
   res.end();
 }
@@ -67,6 +66,9 @@ let InitializedData = false;
     await initial();
     console.log("db 초기화 완료");
     InitializedData = true;
+
+    //새로고침 로그
+    console.log("InitializedData 상태 :",InitializedData);
 
     //서버시작
     server.listen(PORT,()=>{
@@ -93,25 +95,13 @@ function asyncOpen (db,query,params=[]){
 }
 //데이터베이스 연결
 async function connect () {
-  const db = new sqlite3.Database('./data.db',(err)=>{
+  const db = new sqlite3.Database(dbPath,(err)=>{
     if(err){
       console.error("db 연결 실패",err);
     }else {
       console.log("db 연결 성공");
     }
   });
-
-  //테이블 없으면 생성
-  try{
-    await asyncOpen(db,`
-      CREATE TABLE IF NOT EXISTS data(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        about TEXT
-      )
-    `);
-  } catch (err){
-    console.error("table 생성 중 오류",err);
-  }
   return db;
 }
 
@@ -128,53 +118,48 @@ const server = http.createServer(async(req,res)=> {
   //POST 메소드
   if(req.method === "POST") {
     //data가 들어오는 곳, json -> 객체
+    if(!InitializedData) {
+      res.writeHead(503,{"content-type":"application/json"});
+      res.end(JSON.stringify({success:false,error:"서버 초기화 중"}));
+      return;
+    }
     if(req.url === "/text") {
       let body = "";
 
       //데이터 누적
       req.on("data",(chunk)=>{
         body += chunk.toString();
-        console.log("body:"+body);
       });
 
       req.on("end",async()=>{
 
         //데이터 파싱
         const parseData= querystring.parse(body);
-        console.log("parseData: ",parseData);
 
         //데이터베이스 연결
         const db = await connect();
 
         //데이터베이스에 삽입
-        const {about} = parseData;
-        await db.run("INSERT INTO data (about) VALUES (?)",[about]);
-
-        console.log('데이터베이스에 저장');
-
-        //응답
-        res.writeHead(302,{"Location":"/"});
-        res.end();
-      })
+        try {
+          await asyncOpen(db,"INSERT INTO data (about) VALUES (?)",[parseData.about]);
+          console.log('데이터베이스에 저장');
+          res.writeHead(302,{"Location":"/"});
+          res.end();
+        }catch (err) {
+          console.error("데이터 삽입 중 오류",err);
+          res.writeHead(500,{"content-type":"applicatioin/json"});
+          res.end(JSON.stringify({success:false,error:err.message}))
+        } finally {
+          db.close();
+        }
+      });
     }
+
     if(req.url === "/reset"){
-      //초기화가 되지 않았음 에러 응답
-      if(!InitializedData){
-        res.writeHead(503,{"content-type":"application/json"});
-        res.end(JSON.stringify({success:false,error:"서버 초기화 중"}))
-        return;
-      }
-      
       //데이터 베이스 초기화
       const db = await connect();
       try{
-        await new Promise((resolve,reject)=>{
-          db.run("DELETE FROM data",(err)=>{
-            if(err) reject(err);
-            else resolve();
-          });
-        });
-
+        await asyncOpen(db,"DELETE FROM data");
         console.log("데이터 초기화 완료");
         res.writeHead(200,{"content-type":"application/json"});
         res.end(JSON.stringify({success:true}));
@@ -185,10 +170,10 @@ const server = http.createServer(async(req,res)=> {
       }finally {
         db.close();
       }
-
     }
   }
 });
+
 //웹소켓 서버 생성
 const wss = new WebSocketServer({server});
 
@@ -200,7 +185,7 @@ wss.on("connection",async (ws)=>{
     return;
   }
   
-  console.log("웹소켓 : 연결");
+  console.log("웹소켓 : 연결 완료");
   
   //데이터베이스에서 데이터 읽기
   const db =   await connect();
@@ -228,8 +213,3 @@ wss.on("connection",async (ws)=>{
       console.log("받은 메시지:",message);
     });
   });
-
-//상단에서 초기화 함수와 함께 호출
-// server.listen(PORT,()=>{
-//   console.log(`http://localhost:${PORT}`);
-// });
