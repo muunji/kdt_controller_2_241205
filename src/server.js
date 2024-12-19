@@ -11,12 +11,41 @@ const PORT = 3000;
 const __dirname = path.resolve();
 const filePath = path.join(__dirname,"/text.json");
 
-//JSON 파일 초기화
-//초기 데이터
-function initial(){
-  const initialData = [];
-  writeFileSync(filePath,JSON.stringify(initialData,null,2),'utf-8');
-  console.log("JSON 파일 초기화")
+//db 파일 초기화
+async function initial(){
+  const db = new sqlite3.Database('/data.db',(err)=>{
+    if(err){
+      console.error("연결 실패",err);
+    }else {
+      console.error("연결 성공")
+    }
+  });
+  
+  //테이블 초기화
+  await new Promise((resolve,reject)=>{
+    db.run(
+      `CREATE TABLE IF NOT EXISTS data(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      about TEXT
+      )`,(err)=>{
+        if(err) reject(err);
+        else resolve();
+      }
+    );
+  });
+
+  //기존 데이터 삭제
+  await new Promise((resolve,reject)=>{
+    db.run("DELETE FROM data",(err)=>{
+      if(err) reject(err);
+      else {
+        console.log("초기화 완료");
+        resolve();
+      }
+    });
+  });
+
+  db.close();
 }
 
 
