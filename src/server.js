@@ -58,12 +58,15 @@ function pageData(res,url,type){
   res.end();
 }
 
+let InitializedData = false;
+
 (async()=>{
   try{
     //데이터베이스 초기화
     console.log("db 초기화 시작")
     await initial();
     console.log("db 초기화 완료");
+    InitializedData = true;
 
     //서버시작
     server.listen(PORT,()=>{
@@ -155,13 +158,34 @@ const server = http.createServer(async(req,res)=> {
       })
     }
     if(req.url === "/reset"){
+      //초기화가 되지 않았음 에러 응답
+      if(!InitializedData){
+        res.writeHead(503,{"content-type":"application/json"});
+        res.end(JSON.stringify({success:false,error:"서버 초기화 중"}))
+        return;
+      }
       
       //데이터 베이스 초기화
       const db = await connect();
-      await db.run("DELETE FROM data");
+      try{
+        await new Promise((resolve,reject)=>{
+          db.run("DELETE FROM data",(err)=>{
+            if(err) reject(err);
+            else resolve();
+          });
+        });
 
-      res.writeHead(200,{"content-type":"application/json"});
-      res.end(JSON.stringify({success:true}));
+        console.log("데이터 초기화 완료");
+        res.writeHead(200,{"content-type":"application/json"});
+        res.end(JSON.stringify({success:true}));
+      } catch(err){
+        console.error("초기화 중 오류",err);
+        res.writeHead(500,{"content-type":"application/json"});
+        res.end(JSON.stringify({success:false,error:err.message}));
+      }finally {
+        db.close();
+      }
+
     }
   }
 });
@@ -170,8 +194,14 @@ const wss = new WebSocketServer({server});
 
 //웹소켓 연결 수락
 wss.on("connection",async (ws)=>{
+  if(!InitializedData){
+    ws.send(JSON.stringify({error:"서버 초기화 중"}));
+    ws.close();
+    return;
+  }
+  
   console.log("웹소켓 : 연결");
-
+  
   //데이터베이스에서 데이터 읽기
   const db =   await connect();
 
@@ -183,6 +213,7 @@ wss.on("connection",async (ws)=>{
         resolve(rows);
       });
     });
+
     console.log("전송할 데이터", rows);
     //클라이언트에 데이터 전송
     ws.send(JSON.stringify(rows)); 
@@ -191,7 +222,6 @@ wss.on("connection",async (ws)=>{
   }finally {
     db.close();
   }
-  
 
     //클라이언트가 메시지를 보낼 때
     ws.on("message",(message)=>{

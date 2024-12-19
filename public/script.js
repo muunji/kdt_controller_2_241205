@@ -28,7 +28,7 @@ socket.addEventListener("message",(event)=>{
   data.forEach((value)=>{
     const p =document.createElement("p");
     //저장된 데이터 중 'about' 값 출력
-    p.textContent = value;
+    p.textContent = `${value.id} : ${value.about}`;
     dataDiv.appendChild(p);
   });
 });
