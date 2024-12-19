@@ -57,7 +57,20 @@ function pageData(res,url,type){
   res.end();
 }
 
-initial();
+(async()=>{
+  try{
+    //데이터베이스 초기화
+    await initial();
+    console.log("초기화 완료");
+
+    //서버시작
+    server.listen(PORT,()=>{
+      console.log("서버 실행 중")
+    });
+  }catch(err){
+    console.error("초기화중 오류");
+  }
+})();
 
 //sqlite 데이터베이스 연결
 //promise 래핑을 위한 헬퍼
