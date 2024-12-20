@@ -37,7 +37,7 @@ const reTry = performance.getEntriesByType('navigation');
 //새로고침 / f5 눌렀을 때
 if(reTry.length>0 && reTry[0].type === 'reload'){
   //새로고침 요청 감지
-  fetch('/reset',{method:"POST"})
+  fetch('/reset',{method:"POST",cache:"no-cache"})
     .then((res)=>res.json())
     .then((data)=>{
       if(data.success){
