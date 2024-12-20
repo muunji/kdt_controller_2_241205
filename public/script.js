@@ -1,3 +1,36 @@
+
+//초기화, 데이터 요청 관리 코드
+async function fetchDataAndUpdateUI(){
+  try {
+    //서버에 상태 요청
+    const response = await fetch('/status');
+    const status  = await response.json();
+    
+    if(status.initialized) {
+      console.log('초기화 완료, 데이터 요청 시작');
+      //데이터 요청청
+      const dataResponse = await fetch('/data');
+      const data = await dataResponse.json();
+      //데이터 기반으로 UI 업데이트
+      fetchDataAndUpdateUI(data);
+    }else {
+      console.log('초기화 중, 다시시도');
+      //1초 후 재시도
+      setTimeout(fetchDataAndUpdateUI,1000);
+    }
+  } catch (err) {
+    console.error('데이터 요청 오류',err);
+  }
+};
+
+//데이터를 기반으로 DOM 업데이트
+function updateUI(data){
+  console.log("ui data:",data);
+};
+
+//페이지 로드 시 데이터 요청
+window.addEventListener('load',()=>{fetchDataAndUpdateUI();});
+
 //navigation 타입 데이터
 const reTry = performance.getEntriesByType('navigation');
 

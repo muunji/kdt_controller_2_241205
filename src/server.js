@@ -118,6 +118,12 @@ const server = http.createServer(async(req,res)=> {
     if(req.url.includes("script")){
       pageData(res,"/public/script.js","application/javascript");
     }
+    //상태 확인 엔드포인트 추가
+    if(req.url === "/status") {
+      res.writeHead(200,{"content-type":"application/json"});
+      res.end(JSON.stringify({initialized:InitializedData}));
+      return;
+    }
   }
   //POST 메소드
   if(req.method === "POST") {
@@ -180,13 +186,22 @@ const server = http.createServer(async(req,res)=> {
         console.error("초기화 중 오류",err);
         res.writeHead(500,{"content-type":"application/json"});
         res.end(JSON.stringify({success:false,error:err.message}));
-      }f
+      }
     }
   }
 });
 
 //웹소켓 서버 생성
 const wss = new WebSocketServer({server});
+
+wss.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  if(message.type === "reset"){
+    console.log("데이터 초기화 완료 신호 수신, 데이터 갱신");
+    //데이터 재요청 후 ui 업데이트
+    fetchDataAndUpdateUI();
+  }
+};
 
 //웹소켓 연결 수락
 wss.on("connection",async (ws)=>{
