@@ -5,7 +5,16 @@ const reTry = performance.getEntriesByType('navigation');
 if(reTry.length>0 && reTry[0].type === 'reload'){
   //새로고침 요청 감지
   fetch('/reset',{method:"POST"})
-    .then(()=>console.log("새로고침 요청 보냄"))
+    .then((res)=>res.json())
+    .then((data)=>{
+      if(data.success){
+        console.log('데이터 초기화 완료');
+        //데이터 재요청 후 UI 갱신
+        fetchDataAndUpdateUI();
+      }else{
+        console.error('데이터 초기화 실패',data.error);
+      }
+    })
     .catch((err)=>console.error("요청 실패",err));
 };
 
