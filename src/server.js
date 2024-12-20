@@ -161,19 +161,26 @@ const server = http.createServer(async(req,res)=> {
 
     if(req.url === "/reset"){
       //데이터 베이스 초기화
-      const db = await connect();
+      //서버 초기화 후 클라이언트 데이터 갱신신
       try{
-        await asyncOpen(db,"DELETE FROM data");
+        //데이터 초기화
+        const db = await connect();
+        await new Promise((resolve,reject)=>{
+          db.run("DELETE FROM data",(err)=>{
+            if(err) reject(err);
+            else resolve(); 
+          });
+        });
+
         console.log("데이터 초기화 완료");
         res.writeHead(200,{"content-type":"application/json"});
+        //초기화 완료 후 신호 반환
         res.end(JSON.stringify({success:true}));
       } catch(err){
         console.error("초기화 중 오류",err);
         res.writeHead(500,{"content-type":"application/json"});
         res.end(JSON.stringify({success:false,error:err.message}));
-      }finally {
-        db.close();
-      }
+      }f
     }
   }
 });
