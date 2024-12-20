@@ -106,6 +106,10 @@ async function connect () {
 }
 
 const server = http.createServer(async(req,res)=> {
+  //브라우저 캐시 무효화
+  //캐시를 사용하지 않도록 설정정
+  res.setHeader("Cache-Control","no-store");
+
   // GET 메소드
   if(req.method==="GET") {
     if(req.url === "/"){
